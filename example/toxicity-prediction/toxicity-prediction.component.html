@@ -1,9 +1,10 @@
 <h1>Toxicity Prediction</h1>
-<p>Input a list of SMILES strings to render a toxicity chart.</p>
+<p>Predict the toxicity of a compound set by running compound SMILE strings against a deep learning Tox21 model.</p>
 
 <h2>SMILES</h2>
 <form (submit)="onRender()">
     <textarea name="text" rows="6" [(ngModel)]="text" [placeholder]="'Please enter SMILES strings here (one per line).'"></textarea>
+    <button type="submit" class="button" [disabled]="loading || !text">Render Toxicity Chart</button>
     <button type="submit" class="button" [disabled]="loading || !text">Render Toxicity Chart</button>
 </form>
 
