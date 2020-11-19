@@ -1,0 +1,12 @@
+@import 'src/variables';
+
+.document-container:not(:last-child) {
+    margin-bottom: 24px;
+}
+.name {
+    font-size: 20px;
+    font-weight: 700;
+}
+.date {
+    margin-bottom: 16px;
+}

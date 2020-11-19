@@ -1,0 +1,120 @@
+@import 'src/variables';
+
+:host {
+    display: flex;
+    flex-direction: column;
+    height:  100vh;
+    overflow: hidden;
+}
+
+.top-container {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    font-family: Vyasa, sans-serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: $theme-white;
+    background-color: $theme-blue;
+    height: 60px;
+    padding: 0px 32px;
+
+    img.logo {
+        height: 34px;
+        margin-right: 8px;
+    }
+    .spacer {
+        flex: 1 1 auto;
+    }
+    a.github {
+        img {
+            display: block;
+            height: 24px;
+        }
+
+        &:hover {
+            opacity: 0.9;
+        }
+    }
+    .hamburger {
+        display: none;
+        cursor: pointer;
+        width: 44px;
+        height: 44px;
+        img {
+            height: 34px;
+            margin: 5px;
+        }
+    }
+}
+
+.bottom-container {
+    flex: 1 1 auto;
+    display: flex;
+    overflow: hidden;
+}
+
+.left-container {
+    flex: 0 0 auto;
+    background-color: $theme-white;
+    width: 298px;
+    border-right: 1px solid $theme-gray;
+    padding: 24px 32px;
+
+    .close {
+        display: none;
+        cursor: pointer;
+        width: 44px;
+        height: 44px;
+        img {
+            height: 34px;
+            margin: 5px;
+        }
+    }
+}
+
+.center-container {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.scrollable-region {
+    flex: 1 1 auto;
+    overflow: auto;
+}
+
+.content-container {
+    max-width: 768px;
+    padding: 24px 32px;
+}
+
+@media only screen and (max-width: $cutoff) {
+    .top-container {
+        padding: 0px 16px;
+        a.github {
+            display: none;
+        }
+        .hamburger {
+            display: block;
+        }
+    }
+    .left-container {
+        display: none;
+        padding: 12px 16px;
+        z-index: 1;
+
+        &.shown {
+            display: block; 
+            position: fixed; top: 0px; bottom: 0px; right: 0px;
+            width: 100%;
+        }
+        .close {
+            display: block;
+            position: fixed; top: 11px; right: 16px;
+        }
+    }
+    .content-container {
+        padding: 24px 16px;
+    }
+}

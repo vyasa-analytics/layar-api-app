@@ -1,0 +1,24 @@
+<h1>Radar</h1>
+<p>Identify conceptually similar terms between words and phrases.</p>
+
+<h2>Term</h2>
+<form (submit)="onFindRadarTerms()">
+    <input type="text" name="text" [(ngModel)]="text" [placeholder]="'Please enter a term here.'" />
+    <button type="submit" class="button" [disabled]="loading || !text">Find Radar Terms</button>
+</form>
+
+<ng-container *ngIf="terms">
+    <h2>Radar Terms</h2>
+    <app-request-observer></app-request-observer>
+    <app-loading-indicator *ngIf="loading"></app-loading-indicator>
+    <app-error *ngIf="!loading && error" [error]="error"></app-error>
+
+    <ng-container *ngIf="!loading && !error">
+        <div *ngFor="let item of terms">
+            {{ item.term }}
+        </div>
+        <div class="empty" *ngIf="!terms.length">
+            No results found.
+        </div>
+    </ng-container>
+</ng-container>

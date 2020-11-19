@@ -1,0 +1,25 @@
+<h1>Named Entity Recognition</h1>
+<p>Identify several entity types from any type of corpora within the Layar data fabric.</p>
+
+<h2>Paragraph</h2>
+<form (submit)="onTagText()">
+    <textarea name="text" rows="6" [(ngModel)]="text" [placeholder]="'Please enter a paragraph of text here.'"></textarea>
+    <button type="submit" class="button" [disabled]="loading || !text">Tag Paragraph</button>
+</form>
+
+<ng-container *ngIf="textComponents">
+    <h2>Result</h2>
+    <app-request-observer></app-request-observer>
+    <app-loading-indicator *ngIf="loading"></app-loading-indicator>
+    <app-error *ngIf="!loading && error" [error]="error"></app-error>
+
+    <ng-container *ngIf="!loading && !error">
+        <span
+            *ngFor="let item of textComponents"
+            [class.concept]="item.conceptType"
+            class="{{ index(item.conceptType) }}"><div class="hover-text {{ index(item.conceptType) }}" *ngIf="item.conceptType">{{ item.conceptType.name }}</div>{{ item.text }}</span>
+
+        <h2>Legend</h2>
+        <span class="legend-key {{ index(conceptType) }}" *ngFor="let conceptType of conceptTypes">{{ conceptType.name }}</span>
+    </ng-container>
+</ng-container>

@@ -1,0 +1,29 @@
+<h1>Question Answering</h1>
+<p>Input a natural language question and retrieve an answer to that question from a custom paragraph.</p>
+
+<h2>Question</h2>
+<form (submit)="onAnswerQuestion()">
+    <input type="text" name="question" [(ngModel)]="question" [placeholder]="'Please enter your question here.'" />
+    <textarea name="paragraph" rows="6" [(ngModel)]="paragraph" [placeholder]="'Please enter a paragraph of text here.'"></textarea>
+    <button type="submit" class="button" [disabled]="!question || !paragraph">Find Answers</button>
+</form>
+
+<ng-container *ngIf="answers">
+    <h2>Answers</h2>
+    <app-request-observer></app-request-observer>
+    <app-loading-indicator *ngIf="loading"></app-loading-indicator>
+    <app-error *ngIf="!loading && error" [error]="error"></app-error>
+
+    <ng-container *ngIf="!loading && !error">
+        <div class="answer-container" *ngFor="let answer of answers">
+            <div class="answer-title">{{ answer.text }}</div>
+            <app-evidence *ngFor="let evidence of answer.evidence.slice(0, 1)"
+                [text]="answer.text"
+                [evidence]="evidence">
+            </app-evidence>
+        </div>
+        <div class="empty" *ngIf="!answers.length">
+            No answers found.
+        </div>
+    </ng-container>
+</ng-container>

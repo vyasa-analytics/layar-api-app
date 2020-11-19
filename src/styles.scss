@@ -1,0 +1,123 @@
+@font-face {
+    font-family: Vyasa;
+    src: url('assets/fonts/vyasa.otf') format('opentype');
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@200;300;400;600;700;900&display=swap');
+@import 'reset';
+@import 'variables';
+
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 18px;
+    font-weight: 300;
+    color: $theme-black;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+a {
+    color: $theme-black;
+    text-decoration: none;
+
+    &:hover {
+        color: $theme-purple;
+    }
+}
+
+h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 32px 0px 16px 0px;
+
+    &:first-child {
+        margin-top: 0px;
+    }
+}
+
+h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 32px 0px 16px 0px;
+}
+
+p {
+    margin: 0px 0px 8px 0px;
+}
+
+[type=color], [type=date], [type=datetime-local], [type=datetime], [type=email], [type=month], [type=number], [type=password], [type=search], [type=tel], [type=text], [type=time], [type=url], [type=week], textarea, select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    box-shadow: none;
+    outline: none !important;
+    display: block;
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 18px;
+    font-weight: 300;
+    color: $theme-black;
+    background-color: #FDFDFD;
+    border: 1px solid $theme-gray;
+    border-radius: 3px;
+    width: 100%;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+}
+textarea {
+    line-height: 1.5;
+    resize: none;
+}
+select {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='32' height='24' viewBox='0 0 32 24'><polygon points='0,0 32,0 16,24' style='fill: rbg(17,17,17)'></polygon></svg>");
+    background-position: right -1rem center;
+    background-origin: content-box;
+    background-repeat: no-repeat;
+    background-size: 12px 8px;
+    width: initial;
+    min-width: 280px;
+    padding-right: 32px;
+}
+@media only screen and (max-width: $cutoff) {
+    select {
+        width: 100%;
+    }
+}
+
+.button {
+    cursor: pointer;
+    outline: none !important;
+    display: flex;
+    align-items: center;
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #fff;
+    background-color: $theme-green;
+    border: none;
+    border-radius: 10rem;
+    padding: 12px 32px;
+
+    &:hover {
+        background-color: darken($theme-green, 10%);
+    }
+
+    &:disabled {
+        background-color: $theme-gray;
+    }
+}
+
+::placeholder {
+    color: #AAA;
+    opacity: 1;
+}
+:-ms-input-placeholder {
+    color: #AAA;
+}
+::-ms-input-placeholder {
+    color: #AAA;
+}

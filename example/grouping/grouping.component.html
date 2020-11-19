@@ -1,0 +1,26 @@
+<h1>Grouping</h1>
+<p>Group like-terms together to reduce redundancy and duplication errors within search results.</p>
+
+<h2>Terms</h2>
+<form (submit)="onFindRadarTerms()">
+    <textarea name="text" rows="6" [(ngModel)]="text" [placeholder]="'Please enter terms here (one per line).'"></textarea>
+    <button type="submit" class="button" [disabled]="loading || !text">Group Terms</button>
+</form>
+
+<ng-container *ngIf="groups">
+    <h2>Groups</h2>
+    <app-request-observer></app-request-observer>
+    <app-loading-indicator *ngIf="loading"></app-loading-indicator>
+    <app-error *ngIf="!loading && error" [error]="error"></app-error>
+
+    <ng-container *ngIf="!loading && !error">
+        <div class="term-container" *ngFor="let group of groups">
+            <div class="term" *ngFor="let term of group">
+                {{ term }}
+            </div>
+        </div>
+        <div class="empty" *ngIf="!groups.length">
+            No results found.
+        </div>
+    </ng-container>
+</ng-container>

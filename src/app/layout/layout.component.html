@@ -1,0 +1,26 @@
+<div class="top-container">
+    <img class="logo" src="assets/images/vyasa-logo-color.png" />
+    <div>VYASA ANALYTICS</div>
+    <div class="spacer"></div>
+    <a class="github" href="https://github.com/vyasa-analytics/vyasa-demo" target="_blank">
+        <img src="assets/images/github.svg" />
+    </a>
+    <div class="hamburger" *ngIf="!hideNav" (click)="showMenu = true">
+        <img src="assets/images/hamburger.svg" />
+    </div>
+</div>
+<div class="bottom-container">
+    <div class="left-container" *ngIf="!hideNav" [class.shown]="showMenu">
+        <div class="close" *ngIf="showMenu" (click)="showMenu = false">
+            <img src="assets/images/close.svg" />
+        </div>
+        <app-sidebar></app-sidebar>
+    </div>
+    <div class="center-container">
+        <div class="scrollable-region">
+            <div class="content-container">
+                <router-outlet></router-outlet>
+            </div>
+        </div>
+    </div>
+</div>

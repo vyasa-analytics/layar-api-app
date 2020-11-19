@@ -1,0 +1,58 @@
+@import 'src/variables';
+
+.overview {
+    font-size: 13px;
+    font-weight: 600;
+    color: #a3a3a3;
+    margin: -16px 0px 16px 0px;
+
+    span {
+        cursor: pointer;
+
+        &:hover {
+            color: $theme-purple;
+        }
+    }
+}
+
+.entry-container {
+    margin-bottom: 32px;
+}
+
+.entry {
+    font-family: Courier, monospace;
+    font-size: 13px;
+    font-weight: 400;
+    background-color: $theme-gray;
+    padding: 16px;
+    border-radius: 3px;
+    margin-bottom: 8px;
+}
+
+.header {
+    font-weight: 700;
+}
+
+.request {
+    & > div:first-child {
+        word-break: break-all;
+    }
+    .body {
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+}
+
+.response {
+    margin-top: 16px;
+    .status {
+        font-weight: 700;
+    }
+}
+
+textarea {
+    font-family: Courier, monospace;
+    font-size: 13px;
+    font-weight: 400;
+    margin: 0;
+}

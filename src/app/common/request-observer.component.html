@@ -1,0 +1,25 @@
+<div class="overview">
+    <span (click)="show = !show">
+        {{ show ? 'HIDE' : 'SHOW' }} REQUESTS
+        <ng-container *ngIf="requests.entries.length">({{ requests.entries.length | number }})</ng-container>
+    </span>
+</div>
+
+<div class="entry-container" *ngIf="show">
+    <div class="entry" *ngFor="let entry of requests.entries">
+        <div class="header">REQUEST</div>
+        <div class="request">
+            <div>{{ entry.request.method }} {{ entry.request.url }}{{ entry.requestParams }}</div>
+            <div class="body" *ngIf="entry.requestBody">{{ entry.requestBody }}</div>
+        </div>
+        <div class="response" *ngIf="entry.response">
+            <div class="status">RESPONSE: {{ entry.responseCode }}</div>
+            <ng-container *ngIf="entry.responseBody">
+                <textarea name="body" rows="12" [(ngModel)]="entry.responseBody" [disabled]="true"></textarea>
+            </ng-container>
+        </div>
+        <div class="response" *ngIf="entry.error">
+            <div class="status">RESPONSE: {{ entry.responseCode }}</div>
+        </div>
+    </div>
+</div>

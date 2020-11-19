@@ -1,0 +1,25 @@
+<h1>Question Answering</h1>
+<p>Input a natural language question and retrieve answers to that question, backed by evidence from our Layar data sources.</p>
+
+<h2>Question</h2>
+<form (submit)="onAnswerQuestion()">
+    <input type="text" name="question" [(ngModel)]="question" [placeholder]="'Please enter your question here.'" />
+    <button type="submit" class="button" [disabled]="!question">Find Answers</button>
+</form>
+
+<ng-container *ngIf="store">
+    <h2>Answers</h2>
+    <app-request-observer></app-request-observer>
+    <app-error *ngIf="store.error" [error]="store.error"></app-error>
+
+    <ng-container *ngIf="!store.error">
+        <app-loading-indicator *ngIf="loading"></app-loading-indicator>
+        <div class="answer-container" *ngFor="let answer of store.answers">
+            <div class="answer-title">{{ answer.text }}</div>
+            <app-evidence *ngFor="let evidence of answer.evidence.slice(0, 1)"
+                [text]="answer.text"
+                [evidence]="evidence">
+            </app-evidence>
+        </div>
+    </ng-container>
+</ng-container>

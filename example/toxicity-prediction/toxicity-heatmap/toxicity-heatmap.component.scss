@@ -1,0 +1,26 @@
+@import 'src/variables';
+
+.som-container {
+    display: flex;
+    flex-direction: column;
+
+    #legend {
+        fill: $theme-black;
+        height: 50px;
+        margin-top: 16px;
+    }
+}
+
+:host ::ng-deep {
+    path.hexagon {
+        cursor: pointer;
+        stroke: $theme-gray;
+        stroke-width: 0.5px;
+
+        &.empty {
+            cursor: default;
+            fill: #000;
+            fill-opacity: 0.25;
+        }
+    }
+}

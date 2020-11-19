@@ -1,0 +1,26 @@
+<h1>Document Search</h1>
+<p>Input a keyword or boolean query and view all relevant hits from across the collection of Layar data sources.</p>
+
+<h2>Search</h2>
+<form (submit)="onFindDocuments()">
+    <input type="text" name="text" [(ngModel)]="text" [placeholder]="'Please enter a search string here.'" />
+    <button type="submit" class="button" [disabled]="loading || !text">Find Documents</button>
+</form>
+
+<ng-container *ngIf="documents">
+    <h2>Documents</h2>
+    <app-request-observer></app-request-observer>
+    <app-loading-indicator *ngIf="loading"></app-loading-indicator>
+    <app-error *ngIf="!loading && error" [error]="error"></app-error>
+
+    <ng-container *ngIf="!loading && !error">
+        <div class="document-container" *ngFor="let document of documents">
+            <a [href]="document.documentURI" target="_blank" class="name">{{ document.name }}</a>
+            <div class="date">Published: {{ document.datePublished | date }}</div>
+            <div class="summary">{{ document.summary }}</div>
+        </div>
+        <div class="empty" *ngIf="!documents.length">
+            No results found.
+        </div>
+    </ng-container>
+</ng-container>

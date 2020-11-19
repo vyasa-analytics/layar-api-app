@@ -1,0 +1,30 @@
+@import 'src/variables';
+
+:host {
+    display: flex;
+    flex-direction: column;
+}
+
+h1 {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+a {
+    display: block;
+    font-weight: 500;
+    padding: 8px 32px;
+    margin: 0px -32px;
+
+    &.active {
+        background-color: $theme-gray;
+    }
+}
+
+.group-header {
+    display: block;
+    font-weight: 500;
+    color: #b3b3b3;
+    padding: 8px 32px;
+    margin: 20px -32px 0px -32px;
+}

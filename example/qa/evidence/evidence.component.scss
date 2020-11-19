@@ -1,0 +1,9 @@
+@import 'src/variables';
+
+.title {
+    font-weight: 400;
+    color: $theme-purple;
+}
+::ng-deep .match {
+    border-bottom: 1px solid $theme-black;
+}

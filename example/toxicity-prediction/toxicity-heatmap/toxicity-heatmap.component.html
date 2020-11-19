@@ -1,0 +1,9 @@
+<div class="som-container">
+    <svg id="hexmap"></svg>
+    <svg id="legend"></svg>
+</div>
+
+<div class="selected-container" *ngIf="selected?.length">
+    <h2>Selected</h2>
+    <div *ngFor="let value of selected">{{ value }}</div>
+</div>
