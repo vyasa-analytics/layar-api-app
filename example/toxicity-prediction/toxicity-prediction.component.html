@@ -8,7 +8,7 @@
 </form>
 
 <ng-container *ngIf="submitted">
-    <h2>Rendered Image</h2>
+    <h2>Toxicity Results</h2>
     <app-request-observer></app-request-observer>
     <app-loading-indicator *ngIf="loading"></app-loading-indicator>
     <app-error *ngIf="!loading && error" [error]="error"></app-error>
