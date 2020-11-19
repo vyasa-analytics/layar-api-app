@@ -1,11 +1,15 @@
 <h1>Features</h1>
-<a [routerLink]="['/compound']" [routerLinkActive]="'active'">Compound Rendering</a>
-<a [routerLink]="['/search']" [routerLinkActive]="'active'">Document Search</a>
-<a [routerLink]="['/grouping']" [routerLinkActive]="'active'">Grouping</a>
-<a [routerLink]="['/ner']" [routerLinkActive]="'active'">Named Entity Recognition</a>
-<a [routerLink]="['/radar']" [routerLinkActive]="'active'">Radar</a>
-<a [routerLink]="['/toxicity']" [routerLinkActive]="'active'">Toxicity Prediction</a>
+
+<div class="group-header">General</div>
+<a  class="grouped"[routerLink]="['/compound']" [routerLinkActive]="'active'">Compound Rendering</a>
+<a  class="grouped"[routerLink]="['/search']" [routerLinkActive]="'active'">Document Search</a>
 
 <div class="group-header">Question Answering</div>
-<a class="grouped" [routerLink]="['/qa']" [routerLinkActive]="'active'">Data Fabric</a>
-<a class="grouped" [routerLink]="['/qa-custom']" [routerLinkActive]="'active'">Custom</a>
+<a class="grouped" [routerLink]="['/qa']" [routerLinkActive]="'active'">Data Fabric Q/A</a>
+<a class="grouped" [routerLink]="['/qa-custom']" [routerLinkActive]="'active'">Custom Text Q/A</a>
+<a class="grouped" [routerLink]="['/ner']" [routerLinkActive]="'active'">Named Entity Recognition</a>
+<a class="grouped" [routerLink]="['/radar']" [routerLinkActive]="'active'">Radar</a>
+
+<div class="group-header">Analytics</div>
+<a class="grouped" [routerLink]="['/toxicity']" [routerLinkActive]="'active'">Toxicity Prediction</a>
+<a class="grouped" [routerLink]="['/grouping']" [routerLinkActive]="'active'">Grouping</a>
