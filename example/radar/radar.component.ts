@@ -11,7 +11,7 @@ export class RadarComponent {
     public loading: boolean = false;
     public error: any = undefined;
 
-    public text: string = 'antihistamine';
+    public text: string = 'melanoma';
 
     public terms: Array<Layar.RadarTerm>;
 
