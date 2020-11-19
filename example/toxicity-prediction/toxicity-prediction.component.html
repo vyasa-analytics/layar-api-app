@@ -5,7 +5,6 @@
 <form (submit)="onRender()">
     <textarea name="text" rows="6" [(ngModel)]="text" [placeholder]="'Please enter SMILES strings here (one per line).'"></textarea>
     <button type="submit" class="button" [disabled]="loading || !text">Render Toxicity Chart</button>
-    <button type="submit" class="button" [disabled]="loading || !text">Render Toxicity Chart</button>
 </form>
 
 <ng-container *ngIf="submitted">
