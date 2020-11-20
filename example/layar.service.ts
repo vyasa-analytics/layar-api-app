@@ -53,7 +53,7 @@ export class LayarService {
             questions: questions,
         }).pipe(map(response => {
             console.log(response.body);
-            return (response.body.answers || []).map(o => {
+            return (response.body.answers || []).filter(o => o.best_prediction).map(o => {
                 return {
                     id: o.id,
                     text: o.best_prediction,
