@@ -1,5 +1,5 @@
 <h1>Named Entity Recognition</h1>
-<p>Identify terms and phrases from an input document from the Layar Biomedical Reference Data Fabric. Classify a wide array of entities for the life sciences (proteins, cells lines, diseases, etc.) and business development  (organizations, people, locations).</p>
+<p>Identify terms and phrases from an input document from the Layar Biomedical Reference Data Fabric. Classify a wide array of entities for the life sciences (proteins, cells lines, diseases, etc.) and business development (organizations, people, locations).</p>
 
 <h2>Paragraph</h2>
 <form (submit)="onTagText()">
@@ -14,11 +14,7 @@
     <app-error *ngIf="!loading && error" [error]="error"></app-error>
 
     <ng-container *ngIf="!loading && !error">
-        <span
-            *ngFor="let item of textComponents"
-            [class.concept]="item.conceptType"
-            class="{{ index(item.conceptType) }}"><div class="hover-text {{ index(item.conceptType) }}" *ngIf="item.conceptType">{{ item.conceptType.name }}</div>{{ item.text }}</span>
-
+        <span class="tagged" [innerHTML]="html"></span>
         <h2>Legend</h2>
         <span class="legend-key {{ index(conceptType) }}" *ngFor="let conceptType of conceptTypes">{{ conceptType.name }}</span>
     </ng-container>
