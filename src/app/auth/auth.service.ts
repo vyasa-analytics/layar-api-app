@@ -10,6 +10,8 @@ import { AuthStrategyOauth } from './auth.strategy.oauth';
 const TIMEOUT_PARAM = 'TIMEOUT_MS';
 const DEFAULT_TIMEOUT_MS = 60 * 5 * 1000; // 5 min
 
+export const IgnoreObserver = '__IgnoreObserver__';
+
 export interface Request {
     method: string; 
     url: string; 
@@ -74,6 +76,9 @@ export class AuthService {
         if (!headers['Accept']) { headers['Accept'] = 'application/json'; }
         if (!headers['X-Vyasa-Client']) { headers['X-Vyasa-Client'] = 'layar'; }
 
+        const ignoreObserver = !!headers[IgnoreObserver];
+        if (headers[IgnoreObserver]) { delete headers[IgnoreObserver]; }
+
         let responseType: 'blob' | 'json' | 'text' = headers['Accept'] === 'application/octet-stream' ? 
             'blob' : headers['Accept'] === 'application/json' ? 'json' : 'text';
 
@@ -113,9 +118,9 @@ export class AuthService {
                 observe: 'response',
             });
         }), timeout(timeoutMs)).pipe(tap(response => {
-            this.observer?.onRequest(request, response, undefined, version);
+            !ignoreObserver && this.observer?.onRequest(request, response, undefined, version);
         }, error => {
-            this.observer?.onRequest(request, undefined, error, version);
+            !ignoreObserver && this.observer?.onRequest(request, undefined, error, version);
         })).subscribe(subject);
 
         return subject;

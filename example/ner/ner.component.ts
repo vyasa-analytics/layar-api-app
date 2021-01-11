@@ -1,10 +1,6 @@
 import { Component } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { finalize, map, mergeMap } from 'rxjs/operators';
+import { finalize, mergeMap } from 'rxjs/operators';
 import { Layar, LayarService } from '../layar.service';
-
-let ConceptTypes: Array<Layar.ConceptType>;
-let ConceptTypeIndexById: { [key: string]: number } = {};
 
 @Component({
     selector: 'app-ner',
@@ -30,15 +26,15 @@ export class NerComponent {
         this.textComponents = [];
 
         const text = this.text;
-        this.populateConceptTypes().pipe(mergeMap(() => {
+        this.layar.populateConceptTypes().pipe(mergeMap(() => {
             return this.layar.tagParagraph(text);
         }), finalize(() => {
             this.loading = false;
         })).subscribe(namedEntities => {
-            this.textComponents = GenerateTextComponents(text, namedEntities);
+            this.textComponents = GenerateTextComponents(text, namedEntities, this.layar);
             this.conceptTypes = [...new Set(namedEntities.map(o => o.typeId))].map(typeId => {
-                const index = ConceptTypeIndexById[typeId];
-                return index >= 0 ? ConceptTypes[index] : undefined;
+                const index = this.layar.conceptTypeIndexById[typeId];
+                return index >= 0 ? this.layar.conceptTypes[index] : undefined;
             }).filter(o => o).sort((a, b) => {
                 const A = a.name.toLowerCase();
                 const B = b.name.toLowerCase();
@@ -50,19 +46,7 @@ export class NerComponent {
     }
 
     public index(conceptType: Layar.ConceptType): string {
-        return `_${conceptType ? (ConceptTypeIndexById[conceptType.id] % 24) : ''}`;
-    }
-
-    private populateConceptTypes(): Observable<void> {
-        // this request doesn't need to be performed with each tagging.
-        // if (ConceptTypes) { return of(true).pipe(map(() => { })); }
-
-        return this.layar.getConceptTypes().pipe(map(conceptTypes => {
-            ConceptTypes = conceptTypes;
-            conceptTypes.forEach((conceptType, index) => {
-                ConceptTypeIndexById[conceptType.id] = index;
-            })
-        }));
+        return `_${conceptType ? (this.layar.conceptTypeIndexById[conceptType.id] % 24) : ''}`;
     }
 }
 
@@ -89,13 +73,13 @@ export interface ConceptType {
     name: string;
 }
 
-export function GenerateTextComponents(text: string, namedEntities: Array<Layar.NamedEntity>): Array<TextComponent> {
+export function GenerateTextComponents(text: string, namedEntities: Array<Layar.NamedEntity>, layar: LayarService): Array<TextComponent> {
     namedEntities = namedEntities || [];
 
     // flatten the named entity list, one entry per substring
     const flattened: Array<FlattenedNamedEntity> = [];
     namedEntities.forEach(entity => {
-        if (ConceptTypeIndexById[entity.typeId] === undefined) { return; }
+        if (layar.conceptTypeIndexById[entity.typeId] === undefined) { return; }
         entity.pos.forEach(o => {
             flattened.push({
                 concept: entity.concept,
@@ -133,7 +117,7 @@ export function GenerateTextComponents(text: string, namedEntities: Array<Layar.
         }
 
         const entity: FlattenedNamedEntity = group.entities[0];
-        const conceptType: ConceptType = ConceptTypes[ConceptTypeIndexById[entity.typeId]];
+        const conceptType: ConceptType = layar.conceptTypes[layar.conceptTypeIndexById[entity.typeId]];
 
         textComponents.push({
             text: text.substring(group.start, group.end),

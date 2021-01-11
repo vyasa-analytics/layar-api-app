@@ -4,6 +4,48 @@
 <h2>Terms</h2>
 <form (submit)="onFindRadarTerms()">
     <textarea name="text" rows="6" [(ngModel)]="text" [placeholder]="'Please enter terms here (one per line).'"></textarea>
+
+    <div class="param-row first">
+        <div class="param-col">
+            <label>Grouping Method</label>
+            <select name="method" [(ngModel)]="method" (ngModelChange)="onMethodChange()" required>
+                <option [value]="'close matches'">Close Matches</option>
+                <option [value]="'token ratio'">Token Ratio</option>
+            </select>
+        </div>
+        <div class="param-col">
+            <label>Close Match Cutoff</label>
+            <input type="number" name="cutoff" [(ngModel)]="cutoff" [placeholder]="'Please enter a value.'" />
+        </div>
+    </div>
+
+    <div class="param-row" *ngIf="method === 'token ratio'">
+        <div class="param-col">
+            <label>Weight By Entity Type</label>
+            <select name="entityType" [(ngModel)]="entityType" required>
+                <option [value]="''" disabled>No entity type selected.</option>
+                <option *ngFor="let entityType of entityTypes" [value]="entityType.id">{{ entityType.name }}</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="param-row" *ngIf="method === 'token ratio'">
+        <div class="param-col">
+            <div class="link" (click)="showAdvanced = !showAdvanced">{{ showAdvanced ? 'Hide Advanced Parameters' : 'Show Advanced Parameters' }}</div>
+        </div>
+    </div>
+
+    <div class="param-row" *ngIf="showAdvanced && method === 'token ratio'">
+        <div class="param-col">
+            <label>Ontology ID</label>
+            <input type="text" name="ontology" [(ngModel)]="ontology" [placeholder]="'Please enter a document ID.'" />
+        </div>
+        <div class="param-col">
+            <label>Stop Words</label>
+            <input type="text" name="stopWords" [(ngModel)]="stopWords" [placeholder]="'A comma separate list.'" />
+        </div>
+    </div>
+
     <button type="submit" class="button" [disabled]="loading || !text">Group Terms</button>
 </form>
 

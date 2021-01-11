@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { AuthService } from 'src/app/auth/auth.service';
+import { AuthService, IgnoreObserver } from 'src/app/auth/auth.service';
 import { RequestObserverService } from 'src/app/common/request-observer.service';
 
 @Injectable()
@@ -63,10 +63,28 @@ export class LayarService {
         }));
     }
 
+    public conceptTypes: Array<Layar.ConceptType>;
+    public conceptTypeIndexById: { [key: string]: number } = {};
+
+    public populateConceptTypes(): Observable<void> {
+        if (this.conceptTypes) { return of(true).pipe(map(() => { })); }
+
+        return this.getConceptTypes().pipe(map(conceptTypes => {
+            this.conceptTypes = conceptTypes;
+            this.conceptTypeIndexById = {};
+            conceptTypes.forEach((conceptType, index) => {
+                this.conceptTypeIndexById[conceptType.id] = index;
+            })
+        }));
+    }
+
     public getConceptTypes(): Observable<Array<Layar.ConceptType>> {
-        return this.auth.GET('/conceptType', {
+        const headers = this.headers(['master-concepts.vyasa.com']);
+        headers[IgnoreObserver] = true;
+
+        return this.auth.GET('/conceptType', { 
             rows: '500'
-        }, this.headers(['master-concepts.vyasa.com'])).pipe(map(response => response.body));
+        }, headers).pipe(map(response => response.body));
     }
 
     public tagParagraph(text: string, types: Array<string> = undefined): Observable<Array<Layar.NamedEntity>> {
@@ -107,9 +125,31 @@ export class LayarService {
         }, { 'Accept': 'text/plain' }).pipe(map(response => response.body));
     }
 
-    public groupTerms(terms: Array<string>, cutoff: number = 0.9): Observable<Array<Array<string>>> {
-        return this.auth.POST('/group/terms', {}, {}, { terms: terms, grouping_params: { close_match_cutoff: cutoff } }).pipe(map(response => {
-            return response.body;
+    public groupTerms(terms: Array<string>, method: string, options: any = undefined): Observable<Array<Array<string>>> {
+        const params: any = {};
+        if (method === 'close matches') {
+            params.close_match_cutoff = options?.close_match_cutoff || 0.9;
+            params.split_up_lists = options?.split_up_lists || false;
+        } else if (method === 'token ratio') {
+            params.close_match_cutoff = options?.close_match_cutoff || 0.9;
+            params.ontology_ids = options?.ontology_ids || undefined;
+            params.ner_tags = options?.ner_tags || undefined;
+            params.ner_url = options?.ner_url || undefined;
+            params.stopwords = options?.stopwords || undefined;
+        }
+
+        return this.auth.POST('/group/answers', {}, {}, {
+            grouping_method: method,
+            grouping_params: params,
+            word_phrases: terms.map((term, index) => {
+                return { id: `${index}`, text: term };
+            }),
+        }).pipe(map(response => {
+            const groups = response.body.word_phrase_groups || {}
+            return Object.keys(groups).map(key => {
+                const array = (method === 'close matches') ? groups[key].sub_answers : groups[key];
+                return array.map(o => o.text);
+            });
         }));
     }
 
