@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Observable, of } from 'rxjs';
 import { finalize, map, mergeMap } from 'rxjs/operators';
 import { Layar, LayarService } from '../layar.service';
@@ -19,8 +20,9 @@ export class NerComponent {
 
     public textComponents: Array<TextComponent>;
     public conceptTypes: Array<Layar.ConceptType>;
+    public html: SafeHtml;
 
-    constructor(private layar: LayarService) { }
+    constructor(private layar: LayarService, private sanitizer: DomSanitizer) { }
 
     public onTagText() {
         this.layar.requests.reset();
@@ -43,9 +45,12 @@ export class NerComponent {
                 const A = a.name.toLowerCase();
                 const B = b.name.toLowerCase();
                 return A < B ? -1 : (A > B ? 1 : 0);
-            })
-        }, error => { 
-            this.error = error || true; 
+            });
+
+            const html = TagParagraph(this.textComponents);
+            this.html = this.sanitizer.bypassSecurityTrustHtml(html);
+        }, error => {
+            this.error = error || true;
         });
     }
 
@@ -71,6 +76,7 @@ export interface FlattenedNamedEntity {
     typeId: string;
     start: number;
     end: number;
+    depth: number;
 }
 
 export interface NamedEntityGroup {
@@ -81,7 +87,10 @@ export interface NamedEntityGroup {
 
 export interface TextComponent {
     text: string;
+    start?: number;
+    end?: number;
     conceptType?: ConceptType;
+    conceptList?: Array<FlattenedNamedEntity>;
 }
 
 export interface ConceptType {
@@ -102,6 +111,7 @@ export function GenerateTextComponents(text: string, namedEntities: Array<Layar.
                 typeId: entity.typeId,
                 start: o[0],
                 end: o[1],
+                depth: -1,
             });
         });
     });
@@ -135,9 +145,14 @@ export function GenerateTextComponents(text: string, namedEntities: Array<Layar.
         const entity: FlattenedNamedEntity = group.entities[0];
         const conceptType: ConceptType = ConceptTypes[ConceptTypeIndexById[entity.typeId]];
 
+        CalculateDepthForGroup(group);
+
         textComponents.push({
             text: text.substring(group.start, group.end),
+            start: group.start,
+            end: group.end,
             conceptType: conceptType,
+            conceptList: group.entities,
         });
         textStart = group.end;
     });
@@ -146,4 +161,90 @@ export function GenerateTextComponents(text: string, namedEntities: Array<Layar.
     }
 
     return textComponents;
+}
+
+interface TreeNode {
+    entity: FlattenedNamedEntity;
+    parent: TreeNode;
+    children: Array<TreeNode>;
+}
+
+export function CalculateDepthForGroup(group: NamedEntityGroup) {
+    const root: TreeNode = { entity: undefined, parent: undefined, children: [] };
+
+    // build a tree from the overlap of the entities
+    let node: TreeNode = root;
+    group.entities.forEach(entity => {
+        while (node.parent && entity.end > node.entity.end) { node = node.parent; }
+        let child: TreeNode = { entity: entity, parent: node, children: [] };
+        node.children.push(child);
+        node = child;
+    });
+
+    // find the max height of the tree
+    let max = 0;
+    traverse(root, (_, level) => { max = Math.max(max, level); });
+
+    // the depth of each entity is the inverse of its level in the tree
+    traverse(root, (node, level) => {
+        if (!node.entity) { return; }
+        node.entity.depth = max - level;
+    });
+}
+
+function traverse(node: TreeNode, callback: (node: TreeNode, level: number) => void, level: number = 0) {
+    callback(node, level);
+    node.children.forEach(child => traverse(child, callback, level + 1));
+}
+
+export function TextComponentsToHtml(textComponents: Array<TextComponent>): string {
+    textComponents = textComponents || [];
+
+    let conceptTypeIds = new Set<string>();
+    const result = textComponents.map(item => {
+        if (!item.conceptList?.length) { return item.text; }
+        item.conceptList.forEach(entity => conceptTypeIds.add(entity.typeId));
+
+        const conceptTypes: Array<ConceptType> = []
+        item.conceptList.forEach(entity => {
+            const conceptType = ConceptTypes[ConceptTypeIndexById[entity.typeId]];
+            if (!conceptType || conceptTypes.find(o => o.id === conceptType.id)) { return; }
+            conceptTypes.push(conceptType);
+        });
+
+        const maxDepth = Math.max(...item.conceptList.map(o => o.depth));
+        return `` +
+            `<span class="concept-container" style="margin: 0px ${maxDepth + 1}px">` +
+            item.conceptList.map((entity, i) => {
+                const start = entity.start - item.start || 0;
+                const end = entity.end - item.start;
+                const pre: string = item.text.substring(0, start);
+                const mid: string = item.text.substring(start, end);
+
+                const index = ConceptTypeIndexById[entity.typeId];
+                const color: string = `${index >= 0 ? ' _' + (index % 24) : ''}`;
+                const toggle: string = `${index >= 0 ? ' __' + (index) : ''}`;
+                const depth: string = ` p${entity.depth + 1}`;
+
+                return `<div class="float"><span class="no-touch">${pre}</span><span class="concept${color}${toggle}${depth}">${mid}</span></div>`;
+            }).join('') +
+            `<span class="text">` +
+            item.text +
+            `<div class="hover-container" style="top: calc(100% + ${maxDepth + 2}px); left: -${maxDepth + 1}px">` +
+            conceptTypes.map(conceptType => {
+                const index = ConceptTypeIndexById[conceptType.id];
+                const color: string = `${index >= 0 ? ' _' + (index % 24) : ''}`;
+                const toggle: string = `${index >= 0 ? ' __' + (index) : ''}`;
+                return `<div class="hover-text${color}${toggle}">${conceptType.name}</div>`;
+            }).join('') +
+            `</div>` +
+            `</span>` +
+            `</span>`;
+    }).join('');
+
+    return result;
+}
+
+export function TagParagraph(namedEntities: Array<TextComponent>): string {
+    return TextComponentsToHtml(namedEntities);
 }
