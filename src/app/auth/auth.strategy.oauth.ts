@@ -4,7 +4,7 @@ import { AuthStrategy, Credentials } from './auth.strategy';
 import { HttpResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
-type RequestFunction = (method: string, path: string, params_: { [key: string]: string | Array<string> }, headers_: { [key: string]: string }, data: any, compress: boolean) => Observable<HttpResponse<any>>;
+type RequestFunction = (method: string, path: string, params_: { [key: string]: string | Array<string> }, headers_: { [key: string]: string }, data: any) => Observable<HttpResponse<any>>;
 
 export class AuthStrategyOauth implements AuthStrategy {
     private clientCredentialsBase64: string;
@@ -27,7 +27,7 @@ export class AuthStrategyOauth implements AuthStrategy {
         let data = params.password ? `password=${encodeURIComponent(params.password)}` : '';
         delete params.password;
 
-        return this.request('POST', '/connect/oauth/token', params, headers, data, false).pipe(map(response => {
+        return this.request('POST', '/connect/oauth/token', params, headers, data).pipe(map(response => {
             let data = response.body;
             if (!data.access_token) { throw 'Invalid access token'; }
             return { accessToken: data.access_token, expiration: 0 };
