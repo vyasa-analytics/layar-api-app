@@ -50,6 +50,12 @@ export class AuthStrategyUser implements AuthStrategy {
         }));
     }
 
+    public userLogout() {
+        this.user = undefined;
+        this.writeCredentialsToLocalStorage(undefined);
+        this.getCredentials().subscribe(() => {});
+    }
+
     public refreshCredentials?(credentials: Credentials): Observable<Credentials> {
         return this.userRefresh(credentials.refreshToken);
     }
