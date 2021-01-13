@@ -33,8 +33,12 @@ export class UserLoginComponent {
         const password: string = this.form.controls['password'].value;
 
         this.loading = true;
-        AuthStrategyUser.instance.userLogin(email, password).subscribe(() => {}, error => {
+        AuthStrategyUser.instance.userLogin(email, password).pipe(finalize(() => {
             this.loading = false;
+        })).subscribe(() => {
+            this.form.controls.email.setValue('');
+            this.form.controls.password.setValue('');
+        }, error => {
             this.error = true;
             setTimeout(() => this.error = false, 3000);
         });

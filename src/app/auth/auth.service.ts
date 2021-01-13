@@ -92,7 +92,7 @@ export class AuthService {
         if (!headers['Accept']) { headers['Accept'] = 'application/json'; }
         if (!headers['X-Vyasa-Client']) { headers['X-Vyasa-Client'] = 'layar'; }
 
-        const ignoreObserver = !!headers[IgnoreObserver];
+        const ignoreObserver: boolean = !!headers[IgnoreObserver] || !!headers_['Authorization'];
         if (headers[IgnoreObserver]) { delete headers[IgnoreObserver]; }
 
         let responseType: 'blob' | 'json' | 'text' = headers['Accept'] === 'application/octet-stream' ? 
