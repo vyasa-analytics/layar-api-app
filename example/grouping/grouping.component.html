@@ -23,7 +23,7 @@
         <div class="param-col">
             <label>Weight By Entity Type</label>
             <select name="entityType" [(ngModel)]="entityType" required>
-                <option [value]="''" disabled>No entity type selected.</option>
+                <option [value]="''">No entity type selected.</option>
                 <option *ngFor="let entityType of entityTypes" [value]="entityType.id">{{ entityType.name }}</option>
             </select>
         </div>
