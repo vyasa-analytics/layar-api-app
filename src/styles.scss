@@ -45,6 +45,13 @@ h2 {
     margin: 32px 0px 16px 0px;
 }
 
+label {
+    display: block;
+    font-weight: 500;
+    font-size: 18px;
+    margin: 16px 0px 8px 0px;
+}
+
 p {
     margin: 0px 0px 8px 0px;
 }
@@ -80,6 +87,9 @@ select {
     width: initial;
     min-width: 280px;
     padding-right: 32px;
+}
+select:invalid {
+    color: #AAA;
 }
 @media only screen and (max-width: $cutoff) {
     select {

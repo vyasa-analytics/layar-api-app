@@ -79,7 +79,6 @@ span {
                 @include highlight-colors();
                 position: relative;
                 color: transparent;
-                border-radius: 3px;
         
                 &.p1 { padding: 1px; left: -1px; }
                 &.p2 { padding: 2px; left: -2px; }

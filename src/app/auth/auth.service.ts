@@ -1,14 +1,17 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, Subject } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
 import { finalize, mergeMap, tap, timeout } from 'rxjs/operators';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { AuthStrategy, Credentials } from './auth.strategy';
 import { AuthStrategyRecaptcha } from './auth.strategy.recaptcha';
 import { AuthStrategyOauth } from './auth.strategy.oauth';
+import { AuthStrategyUser } from './auth.strategy.user';
 
 const TIMEOUT_PARAM = 'TIMEOUT_MS';
 const DEFAULT_TIMEOUT_MS = 60 * 5 * 1000; // 5 min
+
+export const IgnoreObserver = '__IgnoreObserver__';
 
 export interface Request {
     method: string; 
@@ -23,6 +26,18 @@ export interface RequestObserver {
     onRequest(request: Request, response: HttpResponse<any>, error: any, version: number);
 }
 
+interface PendingRequest {
+    method: string;
+    path: string;
+    data: any;
+    headers: { [key: string]: string };
+    params: { [key: string]: string | Array<string> };
+}
+
+class PendingSubject extends Subject<HttpResponse<any>> {
+    constructor(public request: PendingRequest) { super(); }
+}
+
 @Injectable()
 export class AuthService {
     public observer: RequestObserver;
@@ -33,9 +48,12 @@ export class AuthService {
     private credentialsSubject: Subject<Credentials>;
 
     constructor(private http: HttpClient) {
-        this.strategy = environment.authStrategy === 'recaptcha' ?
-            new AuthStrategyRecaptcha(this.http) : 
-            new AuthStrategyOauth(this.request.bind(this));
+        const AuthStrategies = {
+            'recaptcha': () => new AuthStrategyRecaptcha(this.http),
+            'oauth': () => new AuthStrategyOauth(this.request.bind(this)),
+            'user': () => new AuthStrategyUser(this.request.bind(this)),
+        }
+        this.strategy = AuthStrategies[environment.authStrategy] && AuthStrategies[environment.authStrategy]();
     }
 
     private getCredentials(): Observable<Credentials> {
@@ -57,7 +75,7 @@ export class AuthService {
         }
 
         const now = Date.now();
-        if (this.credentials && (this.credentials.expiration <= 0 || this.credentials.expiration > now)) { 
+        if (this.credentials && ((this.credentials.expiration || 0) <= 0 || this.credentials.expiration > now)) { 
             headers['Authorization'] = `Bearer ${this.credentials.accessToken}`;
             return of(true);
         }
@@ -73,6 +91,9 @@ export class AuthService {
         if (!!data && !headers['Content-Type']) { headers['Content-Type'] = 'application/json'; }
         if (!headers['Accept']) { headers['Accept'] = 'application/json'; }
         if (!headers['X-Vyasa-Client']) { headers['X-Vyasa-Client'] = 'layar'; }
+
+        const ignoreObserver: boolean = !!headers[IgnoreObserver] || !!headers_['Authorization'];
+        if (headers[IgnoreObserver]) { delete headers[IgnoreObserver]; }
 
         let responseType: 'blob' | 'json' | 'text' = headers['Accept'] === 'application/octet-stream' ? 
             'blob' : headers['Accept'] === 'application/json' ? 'json' : 'text';
@@ -112,11 +133,20 @@ export class AuthService {
                 responseType: responseType,
                 observe: 'response',
             });
-        }), timeout(timeoutMs)).pipe(tap(response => {
-            this.observer?.onRequest(request, response, undefined, version);
+        }), timeout(timeoutMs)).subscribe(response => {
+            !ignoreObserver && this.observer?.onRequest(request, response, undefined, version);
+            subject.next(response);
+            subject.complete();
         }, error => {
-            this.observer?.onRequest(request, undefined, error, version);
-        })).subscribe(subject);
+            const pending: PendingRequest = { method, path, params: params_, headers: headers_, data };
+            if (!this.shouldAttemptRefresh(error, pending)) {
+                !ignoreObserver && this.observer?.onRequest(request, undefined, error, version);
+                subject.error(error);
+                return;
+            } else {
+                this.processRefresh(pending).subscribe(subject);
+            }
+        });
 
         return subject;
     }
@@ -139,5 +169,60 @@ export class AuthService {
 
     public DELETE(path: string, params: { [key: string]: string | Array<string> }, headers: { [key: string]: string } = {}, data: any = undefined): Observable<HttpResponse<any>> {
         return this.request('DELETE', path, params, headers, data);
+    }
+
+    private shouldAttemptRefresh(response: HttpResponse<any>, pending: PendingRequest): boolean {
+        if (pending.headers['Authorization']) {
+            return false;
+        } else if (!this.credentials?.refreshToken || !this.strategy.refreshCredentials) {
+            return false;
+        } 
+
+        let json = undefined;
+        try { json = response && ((response as any).error || response.body); } catch (error) { }
+        const error = json && json.error && typeof json.error === 'string' && json.error.toLowerCase() || '';
+
+        if (error.indexOf('payment_required') >= 0 || response.status == 402) {
+            return false;
+        } else if (error.indexOf('invalid_token') < 0 && error.indexOf('unauthorized') < 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private pending: Array<PendingSubject> = undefined;
+    private processRefresh(pending: PendingRequest): Observable<HttpResponse<any>> {
+        const subject = new PendingSubject(pending);
+
+        if (this.pending) {
+            this.pending.push(subject);
+            return subject;
+        }
+
+        this.pending = new Array<PendingSubject>();
+        this.pending.push(subject);
+
+        this.strategy.refreshCredentials(this.credentials).pipe(finalize(() => {
+            const pending = this.pending;
+            const credentials = this.credentials;
+
+            this.pending = undefined;
+            
+            for (const subject of pending) {
+                if (credentials?.accessToken) {
+                    const request = subject.request;
+                    this.request(request.method, request.path, request.params, request.headers, request.data).subscribe(subject);
+                } else {
+                    throwError({ statusText: 'Invalid access token.', status: 401 }).subscribe(subject);
+                }
+            }
+        })).subscribe(credentials => {
+            this.credentials = credentials;
+        }, error => {
+            this.credentials = undefined;
+        });
+
+        return subject;
     }
 }

@@ -4,9 +4,6 @@ import { Observable, of } from 'rxjs';
 import { finalize, map, mergeMap } from 'rxjs/operators';
 import { Layar, LayarService } from '../layar.service';
 
-let ConceptTypes: Array<Layar.ConceptType>;
-let ConceptTypeIndexById: { [key: string]: number } = {};
-
 @Component({
     selector: 'app-ner',
     templateUrl: './ner.component.html',
@@ -32,22 +29,22 @@ export class NerComponent {
         this.textComponents = [];
 
         const text = this.text;
-        this.populateConceptTypes().pipe(mergeMap(() => {
+        this.layar.populateConceptTypes().pipe(mergeMap(() => {
             return this.layar.tagParagraph(text);
         }), finalize(() => {
             this.loading = false;
         })).subscribe(namedEntities => {
-            this.textComponents = GenerateTextComponents(text, namedEntities);
+            this.textComponents = GenerateTextComponents(text, namedEntities, this.layar);
             this.conceptTypes = [...new Set(namedEntities.map(o => o.typeId))].map(typeId => {
-                const index = ConceptTypeIndexById[typeId];
-                return index >= 0 ? ConceptTypes[index] : undefined;
+                const index = this.layar.conceptTypeIndexById[typeId];
+                return index >= 0 ? this.layar.conceptTypes[index] : undefined;
             }).filter(o => o).sort((a, b) => {
                 const A = a.name.toLowerCase();
                 const B = b.name.toLowerCase();
                 return A < B ? -1 : (A > B ? 1 : 0);
             });
 
-            const html = TagParagraph(this.textComponents);
+            const html = TagParagraph(this.textComponents, this.layar);
             this.html = this.sanitizer.bypassSecurityTrustHtml(html);
         }, error => {
             this.error = error || true;
@@ -55,19 +52,7 @@ export class NerComponent {
     }
 
     public index(conceptType: Layar.ConceptType): string {
-        return `_${conceptType ? (ConceptTypeIndexById[conceptType.id] % 24) : ''}`;
-    }
-
-    private populateConceptTypes(): Observable<void> {
-        // this request doesn't need to be performed with each tagging.
-        // if (ConceptTypes) { return of(true).pipe(map(() => { })); }
-
-        return this.layar.getConceptTypes().pipe(map(conceptTypes => {
-            ConceptTypes = conceptTypes;
-            conceptTypes.forEach((conceptType, index) => {
-                ConceptTypeIndexById[conceptType.id] = index;
-            })
-        }));
+        return `_${conceptType ? (this.layar.conceptTypeIndexById[conceptType.id] % 24) : ''}`;
     }
 }
 
@@ -98,13 +83,13 @@ export interface ConceptType {
     name: string;
 }
 
-export function GenerateTextComponents(text: string, namedEntities: Array<Layar.NamedEntity>): Array<TextComponent> {
+export function GenerateTextComponents(text: string, namedEntities: Array<Layar.NamedEntity>, layar: LayarService): Array<TextComponent> {
     namedEntities = namedEntities || [];
 
     // flatten the named entity list, one entry per substring
     const flattened: Array<FlattenedNamedEntity> = [];
     namedEntities.forEach(entity => {
-        if (ConceptTypeIndexById[entity.typeId] === undefined) { return; }
+        if (layar.conceptTypeIndexById[entity.typeId] === undefined) { return; }
         entity.pos.forEach(o => {
             flattened.push({
                 concept: entity.concept,
@@ -143,7 +128,7 @@ export function GenerateTextComponents(text: string, namedEntities: Array<Layar.
         }
 
         const entity: FlattenedNamedEntity = group.entities[0];
-        const conceptType: ConceptType = ConceptTypes[ConceptTypeIndexById[entity.typeId]];
+        const conceptType: ConceptType = layar.conceptTypes[layar.conceptTypeIndexById[entity.typeId]];
 
         CalculateDepthForGroup(group);
 
@@ -197,7 +182,7 @@ function traverse(node: TreeNode, callback: (node: TreeNode, level: number) => v
     node.children.forEach(child => traverse(child, callback, level + 1));
 }
 
-export function TextComponentsToHtml(textComponents: Array<TextComponent>): string {
+export function TextComponentsToHtml(textComponents: Array<TextComponent>, layar: LayarService): string {
     textComponents = textComponents || [];
 
     let conceptTypeIds = new Set<string>();
@@ -207,7 +192,7 @@ export function TextComponentsToHtml(textComponents: Array<TextComponent>): stri
 
         const conceptTypes: Array<ConceptType> = []
         item.conceptList.forEach(entity => {
-            const conceptType = ConceptTypes[ConceptTypeIndexById[entity.typeId]];
+            const conceptType = layar.conceptTypes[layar.conceptTypeIndexById[entity.typeId]];
             if (!conceptType || conceptTypes.find(o => o.id === conceptType.id)) { return; }
             conceptTypes.push(conceptType);
         });
@@ -221,7 +206,7 @@ export function TextComponentsToHtml(textComponents: Array<TextComponent>): stri
                 const pre: string = item.text.substring(0, start);
                 const mid: string = item.text.substring(start, end);
 
-                const index = ConceptTypeIndexById[entity.typeId];
+                const index = layar.conceptTypeIndexById[entity.typeId];
                 const color: string = `${index >= 0 ? ' _' + (index % 24) : ''}`;
                 const toggle: string = `${index >= 0 ? ' __' + (index) : ''}`;
                 const depth: string = ` p${entity.depth + 1}`;
@@ -232,7 +217,7 @@ export function TextComponentsToHtml(textComponents: Array<TextComponent>): stri
             item.text +
             `<div class="hover-container" style="top: calc(100% + ${maxDepth + 2}px); left: -${maxDepth + 1}px">` +
             conceptTypes.map(conceptType => {
-                const index = ConceptTypeIndexById[conceptType.id];
+                const index = layar.conceptTypeIndexById[conceptType.id];
                 const color: string = `${index >= 0 ? ' _' + (index % 24) : ''}`;
                 const toggle: string = `${index >= 0 ? ' __' + (index) : ''}`;
                 return `<div class="hover-text${color}${toggle}">${conceptType.name}</div>`;
@@ -245,6 +230,6 @@ export function TextComponentsToHtml(textComponents: Array<TextComponent>): stri
     return result;
 }
 
-export function TagParagraph(namedEntities: Array<TextComponent>): string {
-    return TextComponentsToHtml(namedEntities);
+export function TagParagraph(namedEntities: Array<TextComponent>, layar: LayarService): string {
+    return TextComponentsToHtml(namedEntities, layar);
 }

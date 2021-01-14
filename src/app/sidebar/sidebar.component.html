@@ -13,3 +13,11 @@
 <div class="group-header">Analytics</div>
 <a class="grouped" [routerLink]="['/toxicity']" [routerLinkActive]="'active'">Toxicity Prediction</a>
 <a class="grouped" [routerLink]="['/grouping']" [routerLinkActive]="'active'">Term Grouping</a>
+
+<div class="spacer"></div>
+<div class="user-container" *ngIf="user">
+    <div><strong>Logged In User</strong></div>
+    <div>{{ user.fullName }}</div>
+    <div>{{ user.email }}</div>
+    <div (click)="onLogout()">Logout</div>
+</div>

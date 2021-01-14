@@ -3,6 +3,7 @@
 :host {
     display: flex;
     flex-direction: column;
+    min-height: 100%;
 }
 
 h1 {
@@ -28,4 +29,31 @@ a {
     font-weight: 700;
     padding: 8px 32px;
     margin: 20px -32px 0px -32px;
+}
+
+.spacer {
+    flex: 1 1 auto;
+}
+
+.user-container {
+    background: #FDFDFD;
+    border: 1px solid $theme-gray;
+    border-radius: 3px;
+    padding: 8px 20px;
+    margin: 48px -20px -12px -20px;
+
+    strong { font-weight: 500; }
+
+    & > div:last-child {
+        cursor: pointer;
+        font-weight: 500;
+        color: $theme-purple;
+        margin-top: 8px;
+    }
+}
+@media only screen and (max-width: $cutoff) {
+    .user-container {
+        padding: 8px 16px;
+        margin: 48px -6px 0px -6px;
+    }
 }

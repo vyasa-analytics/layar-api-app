@@ -1,0 +1,26 @@
+<div class="user-login-container" *ngIf="shouldShowLoginForm">
+    <div class="container">
+        <div class="title-container">
+            <img class="logo" src="assets/images/vyasa-logo-color.png" />
+            <div>VYASA ANALYTICS</div>
+        </div>
+        <div class="form-container">
+            <form [formGroup]="form" (submit)="signIn()" novalidate>
+                <input type="text" formControlName="email" name="email" placeholder="Username or E-mail" />
+                <input type="password" formControlName="password" name="password" placeholder="Password" />
+
+                <button type="submit" class="button" [disabled]="loading">Log in</button>
+
+                <a href="/account/forgot-password">Forgot password?</a>
+            </form>
+        </div>
+        <div class="option-container">
+            <strong>Don't have an account yet?</strong><br />
+            Please contact your administrator for an invitation.
+        </div>
+    </div>
+    <div class="error-container" (click)="error = undefined" [class.hidden]="!error">
+        <div><strong>Error</strong></div>
+        <div>Sorry, there was a problem logging in.</div>
+    </div>
+</div>

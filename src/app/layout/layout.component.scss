@@ -60,6 +60,8 @@
     width: 298px;
     border-right: 1px solid $theme-gray;
     padding: 24px 32px;
+    overflow-y: auto;
+    overflow-x: hidden;
 
     .close {
         display: none;

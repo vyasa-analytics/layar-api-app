@@ -22,6 +22,7 @@ import { ToxicityPredictionComponent } from 'example/toxicity-prediction/toxicit
 import { ToxicityHeatmapComponent } from 'example/toxicity-prediction/toxicity-heatmap/toxicity-heatmap.component';
 import { RequestObserverComponent } from './common/request-observer.component';
 import { RequestObserverService } from './common/request-observer.service';
+import { UserLoginComponent } from './user-login/user-login.component';
 
 @NgModule({
     declarations: [
@@ -41,6 +42,7 @@ import { RequestObserverService } from './common/request-observer.service';
         SidebarComponent,
         ToxicityHeatmapComponent,
         ToxicityPredictionComponent,
+        UserLoginComponent,
     ],
     imports: [
         AppRoutingModule,
