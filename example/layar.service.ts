@@ -127,7 +127,7 @@ export class LayarService {
 
     public groupTerms(terms: Array<string>, method: string, options: any = undefined): Observable<Array<Array<string>>> {
         const params: any = {};
-        if (method === 'close matches') {
+        if (method === 'close matches' || method === 'close matches lev') {
             params.close_match_cutoff = options?.close_match_cutoff || 0.9;
             params.split_up_lists = options?.split_up_lists || false;
         } else if (method === 'token ratio') {
@@ -147,7 +147,7 @@ export class LayarService {
         }).pipe(map(response => {
             const groups = response.body.word_phrase_groups || {}
             return Object.keys(groups).map(key => {
-                const array = (method === 'close matches') ? groups[key].sub_answers : groups[key];
+                const array = (method === 'close matches' || method === 'close matches lev') ? groups[key].sub_answers : groups[key];
                 return array.map(o => o.text);
             });
         }));

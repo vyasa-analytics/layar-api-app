@@ -10,6 +10,7 @@
             <label>Grouping Method</label>
             <select name="method" [(ngModel)]="method" (ngModelChange)="onMethodChange()" required>
                 <option [value]="'close matches'">Close Matches</option>
+                <option [value]="'close matches lev'">Close Matches V2</option>
                 <option [value]="'token ratio'">Token Ratio</option>
             </select>
         </div>
