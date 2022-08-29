@@ -60,5 +60,10 @@ export class GroupingComponent {
         this.showAdvanced = false;
         this.ontology = '';
         this.stopWords = '';
+        if (this.method === 'close matches lev') {
+            this.cutoff = 0.7;
+        } else if (this.method === 'close matches') {
+            this.cutoff = 0.85;
+        }
     }
 }
