@@ -20,7 +20,7 @@ export class AuthStrategyRecaptcha implements AuthStrategy {
     public getCredentials(): Observable<Credentials> {
         const result = new Subject<Credentials>();
         grecaptcha.ready(() => grecaptcha.execute(this.recaptchaSiteKey, { action: 'submit' }).then(token => {
-            this.http.get('https://vyasa.com/apidemo/token', {
+            this.http.get(environment['apiUrl'] + '/token', {
                 params: { 'g-recaptcha-response': token },
             }).pipe(map((response: any) => {
                 return { accessToken: response.token, expiration: Date.now() + 60000 };
