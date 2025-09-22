@@ -1,0 +1,20 @@
+name: Release Documentation
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      backfill_days:
+        description: 'Process tags from last N days (0 = most recent tag only)'
+        required: false
+        default: '0'
+        type: 'string'
+
+jobs:
+  create-release-documentation:
+    uses: vyasa-analytics/release-auditing/.github/workflows/release-documentation-git.yml@main
+    with:
+      backfill_days: ${{ fromJSON(inputs.backfill_days || '0') }}
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
