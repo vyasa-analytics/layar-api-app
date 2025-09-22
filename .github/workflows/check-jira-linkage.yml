@@ -1,0 +1,9 @@
+name: Check for JIRA ticket ID Workflow
+
+on:
+  pull_request:
+    types: [opened, edited, reopened]
+
+jobs:
+  check-for-jira-ticket-id:
+    uses: vyasa-analytics/shared-github-workflows/.github/workflows/check-jira-id.yml@main
