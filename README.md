@@ -1,3 +1,7 @@
+# THIS LIBRARY HAS BEEN DEPRECATED AND IS NO LONGER SUPPORTED. 
+
+**Use of the Layar APIs from within Python should be done via `requests` (or any other suitable HTTP request library). Documentation including examples can be found at https://developer.vyasa.com/**
+
 # Vyasa Analytics Demo
 The demo project showcases features available from the Vyasa API.  You can learn more about the Vyasa API [here](https://vyasa.com/solutions/layar-api/).  Documentation for API endpoints is located [here](https://api.vyasa.com/layar/swagger-ui.html).
 
